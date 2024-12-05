@@ -1,0 +1,51 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+*.iml
+
+# Logs
+*.log
+*.tlog
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+packages/
+node_modules/
+
+# NuGet
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+# DotNet CLI
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Azure and cloud
+.localhistory/
+*.PublishProfiles/
+
+# Debug/Release Configurations
+appsettings.Development.json
+appsettings.Production.json
+
+# Global JetBrains Rider settings
+.idea/
+
+# User-specific files
+*.csproj.user
+*.rsuser
