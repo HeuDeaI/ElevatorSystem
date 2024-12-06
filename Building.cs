@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 class Building
 {
-    private List<Elevator> _elevators;
+    public List<Elevator> Elevators;
     public Dictionary<int, Queue<Person>> QueueToUp { get; private set; }
     public Dictionary<int, Queue<Person>> QueueToDown { get; private set; }
     public List<Person> ListOfRequests { get; }
@@ -13,7 +13,7 @@ class Building
 
     private Building()
     {
-        _elevators = new List<Elevator>();
+        Elevators = new List<Elevator>();
         QueueToUp = new Dictionary<int, Queue<Person>>();
         QueueToDown = new Dictionary<int, Queue<Person>>();
         ListOfRequests = new List<Person>();
@@ -30,7 +30,7 @@ class Building
 
     public void AddElevator(Elevator elevator)
     {
-        _elevators.Add(elevator);
+        Elevators.Add(elevator);
         FreeElevators.Add(elevator);
     }
 
@@ -56,14 +56,14 @@ class Building
         ManageElevators(person);
     }
 
-    public void ManageElevators(Person person)
+    private Elevator? FindNearestElevator(int floor)
     {
         Elevator? nearestElevator = null;
         int smallestDistance = int.MaxValue;
 
         foreach (var elevator in FreeElevators)
         {
-            int distance = Math.Abs(elevator.CurrentFloor - person.SpawnFloor);
+            int distance = Math.Abs(elevator.CurrentFloor - floor);
             if (distance < smallestDistance)
             {
                 nearestElevator = elevator;
@@ -71,6 +71,12 @@ class Building
             }
         }
 
+        return nearestElevator;
+    }
+
+    public void ManageElevators(Person person)
+    {
+        var nearestElevator = FindNearestElevator(person.SpawnFloor);
         if (nearestElevator != null)
         {
             FreeElevators.Remove(nearestElevator);
