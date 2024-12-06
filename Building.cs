@@ -20,13 +20,7 @@ class Building
         FreeElevators = new List<Elevator>();
     }
 
-    public static Building Instance
-    {
-        get
-        {
-            return _instance ??= new Building();
-        }
-    }
+    public static Building Instance => _instance ??= new Building();
 
     public void AddElevator(Elevator elevator)
     {
@@ -86,7 +80,7 @@ class Building
 
     public void AssignFreeElevator(Elevator elevator)
     {
-        if (ListOfRequests[0] != null)
+        if (ListOfRequests.Count > 0)
         {
             FreeElevators.Remove(elevator);
             elevator.MoveToFloorWithoutServing(ListOfRequests[0].SpawnFloor);

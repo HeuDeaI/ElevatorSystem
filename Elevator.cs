@@ -18,6 +18,7 @@ class Elevator
         _building = building;
         Capacity = capacity;
         Passengers = new List<Person>();
+        CurrentFloor = 1;
     }
 
     public void MoveToFloor(int destinationFloor)
@@ -60,13 +61,16 @@ class Elevator
                 Passengers.Add(person);
 
                 if (MoveUp && person.DestinationFloor > TargetFloor)
+                {
                     TargetFloor = person.DestinationFloor;
+                }
                 else if (!MoveUp && person.DestinationFloor < TargetFloor)
+                {
                     TargetFloor = person.DestinationFloor;
+                }
             }
         }
     }
-
 
     public void MoveToFloorWithoutServing(int destinationFloor)
     {
@@ -79,17 +83,11 @@ class Elevator
         }
 
         BringPerson();
+        MoveToFloor(TargetFloor.GetValueOrDefault());
     }
 
     public void SwitchOneFloor()
     {
-        if (MoveUp)
-        {
-            CurrentFloor++;
-        }
-        else
-        {
-            CurrentFloor--;
-        }
+        CurrentFloor += MoveUp ? 1 : -1;
     }
 }
