@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
-class Elevator
+public class Elevator
 {
     private static int _idCounter = 0;
     public int Id { get; }
@@ -37,18 +38,18 @@ class Elevator
         _building.AssignFreeElevator(this);
     }
 
-    public void ServeFloor()
+    private void ServeFloor()
     {
         DropOffPerson();
         BringPerson();
     }
 
-    public void DropOffPerson()
+    private void DropOffPerson()
     {
         Passengers.RemoveAll(person => person.DestinationFloor == CurrentFloor);
     }
 
-    public void BringPerson()
+    private void BringPerson()
     {
         var queue = MoveUp ? _building.QueueToUp : _building.QueueToDown;
 
@@ -79,15 +80,19 @@ class Elevator
 
         while (CurrentFloor != TargetFloor)
         {
-            CurrentFloor += MoveUp ? 1 : -1;
+            SwitchOneFloor();
         }
 
         BringPerson();
-        MoveToFloor(TargetFloor.GetValueOrDefault());
+        if (TargetFloor != null)
+        {
+            MoveToFloor(TargetFloor.GetValueOrDefault());
+        }
     }
 
-    public void SwitchOneFloor()
+    private void SwitchOneFloor()
     {
+        Thread.Sleep(500);
         CurrentFloor += MoveUp ? 1 : -1;
     }
 }

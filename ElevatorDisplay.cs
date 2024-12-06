@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-class ElevatorDisplay
+public class ElevatorDisplay
 {
     private readonly int _totalFloors;
     private readonly Building _building;
@@ -43,5 +43,4 @@ class ElevatorDisplay
             .Where(e => e.CurrentFloor == floor)
             .Select(e => $"E{e.Id}[{string.Join(" ", e.Passengers.Select(p => $"#{p.Id}"))}]"));
     }
-
 }

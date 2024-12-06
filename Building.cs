@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-class Building
+public class Building
 {
-    public List<Elevator> Elevators;
+    public List<Elevator> Elevators { get; private set; }
     public Dictionary<int, Queue<Person>> QueueToUp { get; private set; }
     public Dictionary<int, Queue<Person>> QueueToDown { get; private set; }
-    public List<Person> ListOfRequests { get; }
-    public List<Elevator> FreeElevators { get; }
+    public List<Person> ListOfRequests { get; private set; }
+    public List<Elevator> FreeElevators { get; private set; }
 
     private static Building? _instance;
 
@@ -68,7 +68,7 @@ class Building
         return nearestElevator;
     }
 
-    public void ManageElevators(Person person)
+    private void ManageElevators(Person person)
     {
         var nearestElevator = FindNearestElevator(person.SpawnFloor);
         if (nearestElevator != null)

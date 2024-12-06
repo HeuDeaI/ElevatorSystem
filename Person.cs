@@ -1,6 +1,4 @@
-using System;
-
-class Person
+public class Person
 {
     private static int _idCounter = 0;
     public int Id { get; }
