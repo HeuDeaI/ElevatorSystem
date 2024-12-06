@@ -19,4 +19,3 @@ class Program
         Console.WriteLine("Elevator system simulation completed.");
     }
 }
-
