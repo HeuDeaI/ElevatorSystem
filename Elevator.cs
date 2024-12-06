@@ -42,55 +42,42 @@ class Elevator
         BringPerson();
     }
 
+    public void DropOffPerson()
+    {
+        Passengers.RemoveAll(person => person.DestinationFloor == CurrentFloor);
+    }
+
     public void BringPerson()
     {
-        if (MoveUp && _building.QueueToUp.ContainsKey(CurrentFloor))
+        var queue = MoveUp ? _building.QueueToUp : _building.QueueToDown;
+
+        if (queue.ContainsKey(CurrentFloor))
         {
-            while (_building.QueueToUp[CurrentFloor].Count > 0 && Passengers.Count < Capacity)
+            while (queue[CurrentFloor].Count > 0 && Passengers.Count < Capacity)
             {
-                var person = _building.QueueToUp[CurrentFloor].Dequeue();
+                var person = queue[CurrentFloor].Dequeue();
                 _building.ListOfRequests.Remove(person);
                 Passengers.Add(person);
-                if (person.DestinationFloor > TargetFloor)
-                {
+
+                if (MoveUp && person.DestinationFloor > TargetFloor)
                     TargetFloor = person.DestinationFloor;
-                }
-            }
-        }
-        else if (!MoveUp && _building.QueueToDown.ContainsKey(CurrentFloor))
-        {
-            while (_building.QueueToDown[CurrentFloor].Count > 0 && Passengers.Count < Capacity)
-            {
-                var person = _building.QueueToDown[CurrentFloor].Dequeue();
-                _building.ListOfRequests.Remove(person);
-                Passengers.Add(person);
-                if (person.DestinationFloor < TargetFloor)
-                {
+                else if (!MoveUp && person.DestinationFloor < TargetFloor)
                     TargetFloor = person.DestinationFloor;
-                }
             }
         }
     }
 
-    public void DropOffPerson()
-    {
-        var droppedOff = Passengers.FindAll(person => person.DestinationFloor == CurrentFloor);
-        foreach (var person in droppedOff)
-        {
-            Passengers.Remove(person);
-        }
-    }
 
     public void MoveToFloorWithoutServing(int destinationFloor)
     {
         TargetFloor = destinationFloor;
         MoveUp = TargetFloor > CurrentFloor;
+
         while (CurrentFloor != TargetFloor)
         {
-            SwitchOneFloor();
+            CurrentFloor += MoveUp ? 1 : -1;
         }
 
-        MoveUp = !MoveUp;
         BringPerson();
     }
 
