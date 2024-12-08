@@ -25,10 +25,13 @@ public class Elevator
     public void MoveToFloor(int destinationFloor)
     {
         TargetFloor = destinationFloor;
+        MoveUp = TargetFloor > CurrentFloor;
+
+        ServeFloor();
         while (CurrentFloor != TargetFloor)
         {
-            ServeFloor();
             SwitchOneFloor();
+            ServeFloor();
         }
 
         if (!_building.FreeElevators.Contains(this))
@@ -38,7 +41,7 @@ public class Elevator
         _building.AssignFreeElevator(this);
     }
 
-    private void ServeFloor()
+    public void ServeFloor()
     {
         DropOffPerson();
         BringPerson();
@@ -81,12 +84,6 @@ public class Elevator
         while (CurrentFloor != TargetFloor)
         {
             SwitchOneFloor();
-        }
-
-        BringPerson();
-        if (TargetFloor != null)
-        {
-            MoveToFloor(TargetFloor.GetValueOrDefault());
         }
     }
 

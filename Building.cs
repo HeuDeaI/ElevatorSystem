@@ -75,6 +75,7 @@ public class Building
         {
             FreeElevators.Remove(nearestElevator);
             nearestElevator.MoveToFloorWithoutServing(person.SpawnFloor);
+            nearestElevator.ServeFloor();
         }
     }
 
