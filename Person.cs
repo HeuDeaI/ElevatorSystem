@@ -1,24 +1,25 @@
 public class Person
 {
     private static int _idCounter = 0;
+
     public int Id { get; }
-    public int SpawnFloor { get; }
+    public int OriginFloor { get; }
     public int DestinationFloor { get; }
 
-    public Person(int spawnFloor, int destinationFloor)
+    public Person(int originFloor, int destinationFloor)
     {
         Id = ++_idCounter;
-        SpawnFloor = spawnFloor;
+        OriginFloor = originFloor;
         DestinationFloor = destinationFloor;
     }
 
-    public void CallElevatorToUp(Building building)
+    public void RequestElevatorUp(Building building)
     {
-        building.HandleUpRequest(this);
+        building.RequestElevatorUp(this);
     }
 
-    public void CallElevatorForDown(Building building)
+    public void RequestElevatorDown(Building building)
     {
-        building.HandleDownRequest(this);
+        building.RequestElevatorDown(this);
     }
 }

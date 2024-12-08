@@ -3,88 +3,108 @@ using System.Collections.Generic;
 
 public class Building
 {
-    public List<Elevator> Elevators { get; private set; }
-    public Dictionary<int, Queue<Person>> QueueToUp { get; private set; }
-    public Dictionary<int, Queue<Person>> QueueToDown { get; private set; }
-    public List<Person> ListOfRequests { get; private set; }
-    public List<Elevator> FreeElevators { get; private set; }
-
     private static Building? _instance;
+    private readonly Dictionary<int, Queue<Person>> _upwardQueues;
+    private readonly Dictionary<int, Queue<Person>> _downwardQueues;
+    private readonly List<Elevator> _elevators;
+    private readonly List<Elevator> _availableElevators;
+    private readonly List<Person> _requests;
 
     private Building()
     {
-        Elevators = new List<Elevator>();
-        QueueToUp = new Dictionary<int, Queue<Person>>();
-        QueueToDown = new Dictionary<int, Queue<Person>>();
-        ListOfRequests = new List<Person>();
-        FreeElevators = new List<Elevator>();
+        _elevators = new List<Elevator>();
+        _upwardQueues = new Dictionary<int, Queue<Person>>();
+        _downwardQueues = new Dictionary<int, Queue<Person>>();
+        _availableElevators = new List<Elevator>();
+        _requests = new List<Person>();
     }
 
     public static Building Instance => _instance ??= new Building();
 
+    public IReadOnlyList<Elevator> Elevators => _elevators.AsReadOnly();
+    public IReadOnlyDictionary<int, Queue<Person>> UpwardQueues => _upwardQueues;
+    public IReadOnlyDictionary<int, Queue<Person>> DownwardQueues => _downwardQueues;
+
     public void AddElevator(Elevator elevator)
     {
-        Elevators.Add(elevator);
-        FreeElevators.Add(elevator);
+        _elevators.Add(elevator);
+        _availableElevators.Add(elevator);
     }
 
-    public void HandleUpRequest(Person person)
+    public void RequestElevatorUp(Person person)
     {
-        if (!QueueToUp.ContainsKey(person.SpawnFloor))
-        {
-            QueueToUp[person.SpawnFloor] = new Queue<Person>();
-        }
-        QueueToUp[person.SpawnFloor].Enqueue(person);
-        ListOfRequests.Add(person);
-        ManageElevators(person);
+        EnqueueRequest(person, _upwardQueues);
+        AssignElevatorToRequest(person);
     }
 
-    public void HandleDownRequest(Person person)
+    public void RequestElevatorDown(Person person)
     {
-        if (!QueueToDown.ContainsKey(person.SpawnFloor))
-        {
-            QueueToDown[person.SpawnFloor] = new Queue<Person>();
-        }
-        QueueToDown[person.SpawnFloor].Enqueue(person);
-        ListOfRequests.Add(person);
-        ManageElevators(person);
+        EnqueueRequest(person, _downwardQueues);
+        AssignElevatorToRequest(person);
     }
 
-    private Elevator? FindNearestElevator(int floor)
+    private void EnqueueRequest(Person person, Dictionary<int, Queue<Person>> queue)
+    {
+        if (!queue.ContainsKey(person.OriginFloor))
+        {
+            queue[person.OriginFloor] = new Queue<Person>();
+        }
+        queue[person.OriginFloor].Enqueue(person);
+        _requests.Add(person);
+    }
+
+    private Elevator? FindNearestAvailableElevator(int floor)
     {
         Elevator? nearestElevator = null;
-        int smallestDistance = int.MaxValue;
+        int minDistance = int.MaxValue;
 
-        foreach (var elevator in FreeElevators)
+        foreach (var elevator in _availableElevators)
         {
             int distance = Math.Abs(elevator.CurrentFloor - floor);
-            if (distance < smallestDistance)
+            if (distance < minDistance)
             {
                 nearestElevator = elevator;
-                smallestDistance = distance;
+                minDistance = distance;
             }
         }
 
         return nearestElevator;
     }
 
-    private void ManageElevators(Person person)
+    private void AssignElevatorToRequest(Person person)
     {
-        var nearestElevator = FindNearestElevator(person.SpawnFloor);
-        if (nearestElevator != null)
+        var elevator = FindNearestAvailableElevator(person.OriginFloor);
+        if (elevator != null)
         {
-            FreeElevators.Remove(nearestElevator);
-            nearestElevator.MoveToFloorWithoutServing(person.SpawnFloor);
-            nearestElevator.ServeFloor();
+            _availableElevators.Remove(elevator);
+            elevator.MoveToFloorWithoutServing(person.OriginFloor);
+            if (_requests.Any(p => p.Id == person.Id))
+            {
+                elevator.MoveToFloor(person.DestinationFloor);
+            }
         }
     }
 
-    public void AssignFreeElevator(Elevator elevator)
+    public void AssignFreedElevator(Elevator elevator)
     {
-        if (ListOfRequests.Count > 0)
+        if (_requests.Count > 0)
         {
-            FreeElevators.Remove(elevator);
-            elevator.MoveToFloorWithoutServing(ListOfRequests[0].SpawnFloor);
+            var nextRequest = _requests[0];
+            _requests.RemoveAt(0);
+            _availableElevators.Remove(elevator);
+            elevator.MoveToFloorWithoutServing(nextRequest.OriginFloor);
         }
+        else
+        {
+            if (!_availableElevators.Contains(elevator))
+            {
+                _availableElevators.Add(elevator);
+            }
+        }
+    }
+
+    public void ReleaseElevator(Elevator elevator)
+    {
+        AssignFreedElevator(elevator);
     }
 }

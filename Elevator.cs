@@ -5,13 +5,14 @@ using System.Threading;
 public class Elevator
 {
     private static int _idCounter = 0;
+    private readonly Building _building;
+
     public int Id { get; }
     public int CurrentFloor { get; private set; }
     public int? TargetFloor { get; private set; }
-    public bool MoveUp { get; set; }
-    private Building _building;
-    public int Capacity { get; private set; }
-    public List<Person> Passengers { get; private set; }
+    public bool IsMovingUp { get; private set; }
+    public int Capacity { get; }
+    public List<Person> Passengers { get; }
 
     public Elevator(Building building, int capacity)
     {
@@ -22,74 +23,68 @@ public class Elevator
         CurrentFloor = 1;
     }
 
+    public void MoveToFloorWithoutServing(int destinationFloor)
+    {
+        TargetFloor = destinationFloor;
+        IsMovingUp = destinationFloor > CurrentFloor;
+
+        while (CurrentFloor != TargetFloor)
+        {
+            AdvanceOneFloor();
+        }
+    }
+
     public void MoveToFloor(int destinationFloor)
     {
         TargetFloor = destinationFloor;
-        MoveUp = TargetFloor > CurrentFloor;
+        IsMovingUp = destinationFloor > CurrentFloor;
 
-        ServeFloor();
+        ServeCurrentFloor();
         while (CurrentFloor != TargetFloor)
         {
-            SwitchOneFloor();
-            ServeFloor();
+            AdvanceOneFloor();
+            ServeCurrentFloor();
         }
 
-        if (!_building.FreeElevators.Contains(this))
+        _building.ReleaseElevator(this);
+    }
+
+    private void AdvanceOneFloor()
+    {
+        Thread.Sleep(500);
+        CurrentFloor += IsMovingUp ? 1 : -1;
+    }
+
+    public void ServeCurrentFloor()
+    {
+        DropOffPassengers();
+        PickUpPassengers();
+    }
+
+    private void DropOffPassengers()
+    {
+        Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
+    }
+
+    private void PickUpPassengers()
+    {
+        var queue = IsMovingUp ? _building.UpwardQueues : _building.DownwardQueues;
+        if (queue.TryGetValue(CurrentFloor, out var peopleQueue))
         {
-            _building.FreeElevators.Add(this);
-        }
-        _building.AssignFreeElevator(this);
-    }
-
-    public void ServeFloor()
-    {
-        DropOffPerson();
-        BringPerson();
-    }
-
-    private void DropOffPerson()
-    {
-        Passengers.RemoveAll(person => person.DestinationFloor == CurrentFloor);
-    }
-
-    private void BringPerson()
-    {
-        var queue = MoveUp ? _building.QueueToUp : _building.QueueToDown;
-
-        if (queue.ContainsKey(CurrentFloor))
-        {
-            while (queue[CurrentFloor].Count > 0 && Passengers.Count < Capacity)
+            while (peopleQueue.Count > 0 && Passengers.Count < Capacity)
             {
-                var person = queue[CurrentFloor].Dequeue();
-                _building.ListOfRequests.Remove(person);
+                var person = peopleQueue.Dequeue();
                 Passengers.Add(person);
 
-                if (MoveUp && person.DestinationFloor > TargetFloor)
+                if (IsMovingUp && person.DestinationFloor > TargetFloor)
                 {
                     TargetFloor = person.DestinationFloor;
                 }
-                else if (!MoveUp && person.DestinationFloor < TargetFloor)
+                else if (!IsMovingUp && person.DestinationFloor < TargetFloor)
                 {
                     TargetFloor = person.DestinationFloor;
                 }
             }
         }
-    }
-
-    public void MoveToFloorWithoutServing(int destinationFloor)
-    {
-        TargetFloor = destinationFloor;
-        MoveUp = TargetFloor > CurrentFloor;
-
-        while (CurrentFloor != TargetFloor)
-        {
-            SwitchOneFloor();
-        }
-    }
-
-    private void SwitchOneFloor()
-    {
-        Thread.Sleep(500);
-        CurrentFloor += MoveUp ? 1 : -1;
     }
 }

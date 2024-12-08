@@ -16,30 +16,31 @@ public class ElevatorDisplay
     public void Render()
     {
         Console.Clear();
-        var elevators = _building.Elevators;
-        var waitingUp = _building.QueueToUp;
-        var waitingDown = _building.QueueToDown;
-
         for (int i = _totalFloors; i >= 1; i--)
         {
-            string waitingPeople = GetWaitingPeopleDisplay(i, waitingUp, waitingDown);
-            string elevatorSymbol = GetElevatorDisplayAtFloor(i, elevators);
-            Console.WriteLine($"{i}: {waitingPeople,-15} {elevatorSymbol}");
+            string waitingPeople = GetWaitingPeople(i);
+            string elevatorDisplay = GetElevatorAtFloor(i);
+
+            Console.WriteLine($"{i}: {waitingPeople,-15} {elevatorDisplay}");
         }
 
         Console.WriteLine(new string('-', 30));
     }
 
-    private string GetWaitingPeopleDisplay(int floor, Dictionary<int, Queue<Person>> queueUp, Dictionary<int, Queue<Person>> queueDown)
+    private string GetWaitingPeople(int floor)
     {
-        var up = queueUp.ContainsKey(floor) ? string.Join(" ", queueUp[floor].Select(p => $"#{p.Id}↑")) : "";
-        var down = queueDown.ContainsKey(floor) ? string.Join(" ", queueDown[floor].Select(p => $"#{p.Id}↓")) : "";
+        var upQueue = _building.UpwardQueues;
+        var downQueue = _building.DownwardQueues;
+
+        string up = upQueue.ContainsKey(floor) ? string.Join(" ", upQueue[floor].Select(p => $"#{p.Id}↑")) : "";
+        string down = downQueue.ContainsKey(floor) ? string.Join(" ", downQueue[floor].Select(p => $"#{p.Id}↓")) : "";
+
         return $"{up} {down}".Trim();
     }
 
-    private string GetElevatorDisplayAtFloor(int floor, List<Elevator> elevators)
+    private string GetElevatorAtFloor(int floor)
     {
-        return string.Join(" ", elevators
+        return string.Join(" ", _building.Elevators
             .Where(e => e.CurrentFloor == floor)
             .Select(e => $"E{e.Id}[{string.Join(" ", e.Passengers.Select(p => $"#{p.Id}"))}]"));
     }

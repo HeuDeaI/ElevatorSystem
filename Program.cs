@@ -1,4 +1,7 @@
-﻿class Program
+﻿using System;
+using System.Threading;
+
+class Program
 {
     static void Main()
     {
@@ -13,67 +16,13 @@
         new Thread(() =>
         {
             Thread.Sleep(100);
-            new Person(1, 5).CallElevatorToUp(building);
+            new Person(1, 5).RequestElevatorUp(building);
 
             Thread.Sleep(100);
-            new Person(3, 7).CallElevatorToUp(building);
+            new Person(3, 7).RequestElevatorUp(building);
 
-            Thread.Sleep(100);
-            new Person(7, 2).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(4, 1).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(6, 9).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(8, 3).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(2, 6).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(9, 4).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(5, 8).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(10, 1).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(2, 7).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(4, 9).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(7, 3).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(6, 1).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(8, 10).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(5, 2).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(3, 8).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(9, 6).CallElevatorForDown(building);
-
-            Thread.Sleep(100);
-            new Person(1, 4).CallElevatorToUp(building);
-
-            Thread.Sleep(100);
-            new Person(10, 7).CallElevatorToUp(building);
+            // Add more calls as needed...
         }).Start();
-
-
 
         while (true)
         {
