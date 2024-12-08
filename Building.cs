@@ -76,35 +76,23 @@ public class Building
         var elevator = FindNearestAvailableElevator(person.OriginFloor);
         if (elevator != null)
         {
-            _availableElevators.Remove(elevator);
             elevator.MoveToFloorWithoutServing(person.OriginFloor);
+
             if (_requests.Any(p => p.Id == person.Id))
             {
-                elevator.MoveToFloor(person.DestinationFloor);
+                var nextRequest = _requests[0];
+                _requests.RemoveAt(0);
+                _availableElevators.Remove(elevator);
+                elevator.MoveToFloor(nextRequest.DestinationFloor);
             }
         }
     }
-
-    public void AssignFreedElevator(Elevator elevator)
-    {
-        if (_requests.Count > 0)
-        {
-            var nextRequest = _requests[0];
-            _requests.RemoveAt(0);
-            _availableElevators.Remove(elevator);
-            elevator.MoveToFloorWithoutServing(nextRequest.OriginFloor);
-        }
-        else
-        {
-            if (!_availableElevators.Contains(elevator))
-            {
-                _availableElevators.Add(elevator);
-            }
-        }
-    }
-
     public void ReleaseElevator(Elevator elevator)
     {
-        AssignFreedElevator(elevator);
+        _availableElevators.Add(elevator);
+        if (_requests.Count > 0)
+        {
+            AssignElevatorToRequest(_requests[0]);
+        }
     }
 }
