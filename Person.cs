@@ -1,3 +1,5 @@
+using System;
+
 public class Person
 {
     private static int _idCounter = 0;
@@ -8,7 +10,7 @@ public class Person
 
     public Person(int originFloor, int destinationFloor)
     {
-        Id = ++_idCounter;
+        Id = Interlocked.Increment(ref _idCounter);
         OriginFloor = originFloor;
         DestinationFloor = destinationFloor;
     }

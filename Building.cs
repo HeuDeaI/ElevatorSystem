@@ -1,29 +1,31 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Building
 {
     private static Building? _instance;
-    private readonly Dictionary<int, Queue<Person>> _upwardQueues;
-    private readonly Dictionary<int, Queue<Person>> _downwardQueues;
-    private readonly List<Elevator> _elevators;
-    private readonly List<Elevator> _availableElevators;
-    private readonly List<Person> _requests;
+    private readonly ConcurrentDictionary<int, ConcurrentQueue<Person>> _upwardQueues;
+    private readonly ConcurrentDictionary<int, ConcurrentQueue<Person>> _downwardQueues;
+    private readonly ConcurrentBag<Elevator> _elevators;
+    private readonly ConcurrentBag<Elevator> _availableElevators;
+    private readonly BlockingCollection<Person> _requests;
 
     private Building()
     {
-        _elevators = new List<Elevator>();
-        _upwardQueues = new Dictionary<int, Queue<Person>>();
-        _downwardQueues = new Dictionary<int, Queue<Person>>();
-        _availableElevators = new List<Elevator>();
-        _requests = new List<Person>();
+        _upwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
+        _downwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
+        _elevators = new ConcurrentBag<Elevator>();
+        _availableElevators = new ConcurrentBag<Elevator>();
+        _requests = new BlockingCollection<Person>();
     }
 
     public static Building Instance => _instance ??= new Building();
 
-    public IReadOnlyList<Elevator> Elevators => _elevators.AsReadOnly();
-    public IReadOnlyDictionary<int, Queue<Person>> UpwardQueues => _upwardQueues;
-    public IReadOnlyDictionary<int, Queue<Person>> DownwardQueues => _downwardQueues;
+    public IEnumerable<Elevator> Elevators => _elevators;
+    public IDictionary<int, ConcurrentQueue<Person>> UpwardQueues => _upwardQueues;
+    public IDictionary<int, ConcurrentQueue<Person>> DownwardQueues => _downwardQueues;
 
     public void AddElevator(Elevator elevator)
     {
@@ -33,66 +35,41 @@ public class Building
 
     public void RequestElevatorUp(Person person)
     {
-        EnqueueRequest(person, _upwardQueues);
-        AssignElevatorToRequest(person);
+        _upwardQueues.GetOrAdd(person.OriginFloor, _ => new ConcurrentQueue<Person>()).Enqueue(person);
+        _requests.Add(person);
+        AssignElevatorToRequest();
     }
 
     public void RequestElevatorDown(Person person)
     {
-        EnqueueRequest(person, _downwardQueues);
-        AssignElevatorToRequest(person);
+        _downwardQueues.GetOrAdd(person.OriginFloor, _ => new ConcurrentQueue<Person>()).Enqueue(person);
+        _requests.Add(person);
+        AssignElevatorToRequest();
     }
 
-    private void EnqueueRequest(Person person, Dictionary<int, Queue<Person>> queue)
+    private void AssignElevatorToRequest()
     {
-        if (!queue.ContainsKey(person.OriginFloor))
+        if (!_requests.TryTake(out var person))
+            return;
+
+        var elevator = FindNearestAvailableElevator(person.OriginFloor);
+        if (elevator != null)
         {
-            queue[person.OriginFloor] = new Queue<Person>();
+            _availableElevators.TryTake(out elevator);
+            elevator.HandleRequest(person);
         }
-        queue[person.OriginFloor].Enqueue(person);
-        _requests.Add(person);
     }
 
     private Elevator? FindNearestAvailableElevator(int floor)
     {
-        Elevator? nearestElevator = null;
-        int minDistance = int.MaxValue;
-
-        foreach (var elevator in _availableElevators)
-        {
-            int distance = Math.Abs(elevator.CurrentFloor - floor);
-            if (distance < minDistance)
-            {
-                nearestElevator = elevator;
-                minDistance = distance;
-            }
-        }
-
-        return nearestElevator;
+        return _availableElevators
+            .OrderBy(e => Math.Abs(e.CurrentFloor - floor))
+            .FirstOrDefault();
     }
 
-    private void AssignElevatorToRequest(Person person)
-    {
-        var elevator = FindNearestAvailableElevator(person.OriginFloor);
-        if (elevator != null)
-        {
-            elevator.MoveToFloorWithoutServing(person.OriginFloor);
-
-            if (_requests.Any(p => p.Id == person.Id))
-            {
-                var nextRequest = _requests[0];
-                _requests.RemoveAt(0);
-                _availableElevators.Remove(elevator);
-                elevator.MoveToFloor(nextRequest.DestinationFloor);
-            }
-        }
-    }
     public void ReleaseElevator(Elevator elevator)
     {
         _availableElevators.Add(elevator);
-        if (_requests.Count > 0)
-        {
-            AssignElevatorToRequest(_requests[0]);
-        }
+        AssignElevatorToRequest();
     }
 }

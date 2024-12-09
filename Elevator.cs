@@ -16,11 +16,17 @@ public class Elevator
 
     public Elevator(Building building, int capacity)
     {
-        Id = ++_idCounter;
+        Id = Interlocked.Increment(ref _idCounter);
         _building = building;
         Capacity = capacity;
         Passengers = new List<Person>();
         CurrentFloor = 1;
+    }
+
+    public void HandleRequest(Person person)
+    {
+        MoveToFloorWithoutServing(person.OriginFloor);
+        MoveToFloor(person.DestinationFloor);
     }
 
     public void MoveToFloorWithoutServing(int destinationFloor)
@@ -55,7 +61,7 @@ public class Elevator
         CurrentFloor += IsMovingUp ? 1 : -1;
     }
 
-    public void ServeCurrentFloor()
+    private void ServeCurrentFloor()
     {
         DropOffPassengers();
         PickUpPassengers();
@@ -71,20 +77,23 @@ public class Elevator
         var queue = IsMovingUp ? _building.UpwardQueues : _building.DownwardQueues;
         if (queue.TryGetValue(CurrentFloor, out var peopleQueue))
         {
-            while (peopleQueue.Count > 0 && Passengers.Count < Capacity)
+            while (peopleQueue.TryDequeue(out var person) && Passengers.Count < Capacity)
             {
-                var person = peopleQueue.Dequeue();
                 Passengers.Add(person);
-
-                if (IsMovingUp && person.DestinationFloor > TargetFloor)
-                {
-                    TargetFloor = person.DestinationFloor;
-                }
-                else if (!IsMovingUp && person.DestinationFloor < TargetFloor)
-                {
-                    TargetFloor = person.DestinationFloor;
-                }
+                UpdateTargetFloor(person);
             }
+        }
+    }
+
+    private void UpdateTargetFloor(Person person)
+    {
+        if (IsMovingUp && person.DestinationFloor > TargetFloor)
+        {
+            TargetFloor = person.DestinationFloor;
+        }
+        else if (!IsMovingUp && person.DestinationFloor < TargetFloor)
+        {
+            TargetFloor = person.DestinationFloor;
         }
     }
 }

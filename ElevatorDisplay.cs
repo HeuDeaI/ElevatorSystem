@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 public class ElevatorDisplay
@@ -32,8 +31,8 @@ public class ElevatorDisplay
         var upQueue = _building.UpwardQueues;
         var downQueue = _building.DownwardQueues;
 
-        string up = upQueue.ContainsKey(floor) ? string.Join(" ", upQueue[floor].Select(p => $"#{p.Id}↑")) : "";
-        string down = downQueue.ContainsKey(floor) ? string.Join(" ", downQueue[floor].Select(p => $"#{p.Id}↓")) : "";
+        string up = upQueue.TryGetValue(floor, out var upPeople) ? string.Join(" ", upPeople.Select(p => $"#{p.Id}↑")) : "";
+        string down = downQueue.TryGetValue(floor, out var downPeople) ? string.Join(" ", downPeople.Select(p => $"#{p.Id}↓")) : "";
 
         return $"{up} {down}".Trim();
     }
