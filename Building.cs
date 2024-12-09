@@ -53,10 +53,9 @@ public class Building
             return;
 
         var elevator = FindNearestAvailableElevator(person.OriginFloor);
-        if (elevator != null)
+        if (elevator != null && _availableElevators.TryTake(out var confirmedElevator))
         {
-            _availableElevators.TryTake(out elevator);
-            elevator.HandleRequest(person);
+            confirmedElevator.HandleRequest(person);
         }
     }
 
