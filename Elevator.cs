@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 public class Elevator
@@ -76,13 +77,34 @@ public class Elevator
         var queue = IsMovingUp ? _building.UpwardQueues : _building.DownwardQueues;
         if (queue.TryGetValue(CurrentFloor, out var peopleQueue))
         {
-            while (peopleQueue.TryDequeue(out var person) && Passengers.Count < Capacity)
+            while (Passengers.Count < Capacity && peopleQueue.TryDequeue(out var person))
             {
+                RemovePersonFromRequests(person);
+
                 Passengers.Add(person);
                 UpdateTargetFloor(person);
             }
         }
     }
+
+    private void RemovePersonFromRequests(Person person)
+    {
+        var remainingRequests = new ConcurrentQueue<Person>();
+
+        while (_building.Requests.TryDequeue(out var currentPerson))
+        {
+            if (!currentPerson.Equals(person))
+            {
+                remainingRequests.Enqueue(currentPerson); 
+            }
+        }
+
+        foreach (var request in remainingRequests)
+        {
+            _building.Requests.Enqueue(request);
+        }
+    }
+
 
     private void UpdateTargetFloor(Person person)
     {
