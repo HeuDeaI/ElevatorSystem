@@ -13,21 +13,23 @@ class Program
 
         var display = new ElevatorDisplay(10, building);
 
-        new Thread(() =>
+        for (int i = 0; i < 10; i++)
         {
-            Thread.Sleep(100);
-            new Person(1, 5).RequestElevatorUp(building);
+            int personId = i + 1;
+            int startFloor = new Random().Next(1, 6); 
+            int targetFloor = new Random().Next(6, 11);
 
-            Thread.Sleep(100);
-            new Person(3, 7).RequestElevatorUp(building);
-
-            // Add more calls as needed...
-        }).Start();
+            new Thread(() =>
+            {
+                Thread.Sleep(personId * 1000); 
+                new Person(startFloor, targetFloor).RequestElevatorUp(building);
+            }).Start();
+        }
 
         while (true)
         {
             display.Render();
-            Thread.Sleep(50);
+            Thread.Sleep(500);
         }
     }
 }
