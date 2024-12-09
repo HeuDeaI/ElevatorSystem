@@ -26,7 +26,20 @@ public class Elevator
     public void HandleRequest(Person person)
     {
         MoveToFloorWithoutServing(person.OriginFloor);
-        MoveToFloor(person.DestinationFloor);
+        IsMovingUp = person.DestinationFloor > CurrentFloor;
+
+        bool personIsWaiting = 
+            _building.UpwardQueues[person.OriginFloor].Contains(person) ||
+            _building.DownwardQueues[person.OriginFloor].Contains(person);
+
+        ServeCurrentFloor();
+
+        if (personIsWaiting)
+        {
+            MoveToFloor(person.DestinationFloor);
+        }
+
+        _building.ReleaseElevator(this);
     }
 
     public void MoveToFloorWithoutServing(int destinationFloor)
@@ -43,16 +56,11 @@ public class Elevator
     public void MoveToFloor(int destinationFloor)
     {
         TargetFloor = destinationFloor;
-        IsMovingUp = destinationFloor > CurrentFloor;
-
-        ServeCurrentFloor();
         while (CurrentFloor != TargetFloor)
         {
             AdvanceOneFloor();
             ServeCurrentFloor();
         }
-
-        _building.ReleaseElevator(this);
     }
 
     private void AdvanceOneFloor()

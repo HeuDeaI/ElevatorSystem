@@ -22,6 +22,12 @@ public class Building
         _availableElevators = new ConcurrentBag<Elevator>();
         _requests = new ConcurrentQueue<Person>();
 
+        for (int floor = 0; floor <= TotalFloors; ++floor)
+        {
+            _upwardQueues[floor] = new ConcurrentQueue<Person>();
+            _downwardQueues[floor] = new ConcurrentQueue<Person>();
+        }
+
         for (int i = 0; i < elevatorCount; i++)
         {
             var elevator = new Elevator(this);
@@ -90,5 +96,4 @@ public class Building
 
     public IDictionary<int, ConcurrentQueue<Person>> UpwardQueues => _upwardQueues;
     public IDictionary<int, ConcurrentQueue<Person>> DownwardQueues => _downwardQueues;
-    public ConcurrentQueue<Person> Requests => _requests;
 }
