@@ -5,13 +5,9 @@ class Program
 {
     static void Main()
     {
-        var building = Building.Instance;
+        var building = new Building(10, 3, 5); // 10 floors, 3 elevators, capacity 5 per elevator
 
-        building.AddElevator(new Elevator(building, 5));
-        building.AddElevator(new Elevator(building, 5));
-        building.AddElevator(new Elevator(building, 5));
-
-        var display = new ElevatorDisplay(10, building);
+        var display = new ElevatorDisplay(building);
 
         for (int i = 0; i < 10; i++)
         {

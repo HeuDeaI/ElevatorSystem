@@ -3,19 +3,17 @@ using System.Linq;
 
 public class ElevatorDisplay
 {
-    private readonly int _totalFloors;
     private readonly Building _building;
 
-    public ElevatorDisplay(int totalFloors, Building building)
+    public ElevatorDisplay(Building building)
     {
-        _totalFloors = totalFloors;
         _building = building;
     }
 
     public void Render()
     {
         Console.Clear();
-        for (int i = _totalFloors; i >= 1; i--)
+        for (int i = _building.TotalFloors; i >= 1; i--)
         {
             string waitingPeople = GetWaitingPeople(i);
             string elevatorDisplay = GetElevatorAtFloor(i);
