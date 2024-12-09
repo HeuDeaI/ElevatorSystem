@@ -79,29 +79,11 @@ public class Elevator
         {
             while (Passengers.Count < Capacity && peopleQueue.TryDequeue(out var person))
             {
-                RemovePersonFromRequests(person);
+                _building.RemovePersonFromRequests(person);
 
                 Passengers.Add(person);
                 UpdateTargetFloor(person);
             }
-        }
-    }
-
-    private void RemovePersonFromRequests(Person person)
-    {
-        var remainingRequests = new ConcurrentQueue<Person>();
-
-        while (_building.Requests.TryDequeue(out var currentPerson))
-        {
-            if (!currentPerson.Equals(person))
-            {
-                remainingRequests.Enqueue(currentPerson); 
-            }
-        }
-
-        foreach (var request in remainingRequests)
-        {
-            _building.Requests.Enqueue(request);
         }
     }
 

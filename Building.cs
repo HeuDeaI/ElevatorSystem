@@ -57,6 +57,24 @@ public class Building
         }
     }
 
+    public void RemovePersonFromRequests(Person person)
+    {
+        var remainingRequests = new ConcurrentQueue<Person>();
+
+        while (_requests.TryDequeue(out var currentPerson))
+        {
+            if (!currentPerson.Equals(person))
+            {
+                remainingRequests.Enqueue(currentPerson); 
+            }
+        }
+
+        foreach (var request in remainingRequests)
+        {
+            _requests.Enqueue(request);
+        }
+    }
+
     private Elevator? FindNearestAvailableElevator(int floor)
     {
         return _availableElevators

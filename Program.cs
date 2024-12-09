@@ -7,7 +7,7 @@ class Program
 
     static void Main()
     {
-        var building = new Building(totalFloors: 19, elevatorCount: 3);
+        var building = new Building(totalFloors: 9, elevatorCount: 2);
         PersonManager.InitializePersonRequests(building, personCount: 20);
         var display = new ElevatorDisplay(building);
 
