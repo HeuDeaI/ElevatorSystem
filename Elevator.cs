@@ -105,7 +105,6 @@ public class Elevator
         }
     }
 
-
     private void UpdateTargetFloor(Person person)
     {
         if (IsMovingUp && person.DestinationFloor > TargetFloor)

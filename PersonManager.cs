@@ -3,19 +3,39 @@ using System.Threading;
 
 public static class PersonManager
 {
+    private static readonly Random _random = new Random();
+
     public static void InitializePersonRequests(Building building, int personCount)
     {
+        int cumulativeDelay = 0; 
+
         for (int i = 0; i < personCount; i++)
         {
-            int personId = i + 1;
-            int startFloor = new Random().Next(1, 6);
-            int targetFloor = new Random().Next(6, 10);
+            int individualDelay = _random.Next(500, 1500); 
+            cumulativeDelay += individualDelay; 
+            int delayForThisPerson = cumulativeDelay;
 
             new Thread(() =>
             {
-                Thread.Sleep(personId * 1000);
+                Thread.Sleep(delayForThisPerson);
+                int startFloor = _random.Next(1, building.TotalFloors + 1);
+                int targetFloor;
+
+                do
+                {
+                    targetFloor = _random.Next(1, building.TotalFloors + 1);
+                } while (targetFloor == startFloor);
+
                 var person = new Person(startFloor, targetFloor);
-                person.RequestElevatorUp(building);
+
+                if (targetFloor > startFloor)
+                {
+                    person.RequestElevatorUp(building);
+                }
+                else
+                {
+                    person.RequestElevatorDown(building);
+                }
             }).Start();
         }
     }

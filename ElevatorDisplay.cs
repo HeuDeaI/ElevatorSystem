@@ -13,12 +13,15 @@ public class ElevatorDisplay
     public void Render()
     {
         Console.Clear();
+        Console.WriteLine("Elevator Simulation");
+        Console.WriteLine(new string('=', 30));
+
         for (int i = _building.TotalFloors; i >= 1; i--)
         {
             string waitingPeople = GetWaitingPeople(i);
             string elevatorDisplay = GetElevatorAtFloor(i);
 
-            Console.WriteLine($"{i}: {waitingPeople,-15} {elevatorDisplay}");
+            Console.WriteLine($"{i,2}: [{waitingPeople,-20}] {elevatorDisplay}");
         }
 
         Console.WriteLine(new string('-', 30));
