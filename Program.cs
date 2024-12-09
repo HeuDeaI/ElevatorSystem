@@ -5,7 +5,7 @@ class Program
 {
     static void Main()
     {
-        var building = new Building(10, 3, 5); // 10 floors, 3 elevators, capacity 5 per elevator
+        var building = new Building(9, 3, 5);
 
         var display = new ElevatorDisplay(building);
 
