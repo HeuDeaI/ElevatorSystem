@@ -14,7 +14,7 @@ public class ElevatorDisplay
     {
         Console.Clear();
         Console.WriteLine("Elevator Simulation");
-        Console.WriteLine(new string('=', 30));
+        Console.WriteLine(new string('=', 40));
 
         for (int i = _building.TotalFloors; i >= 1; i--)
         {
@@ -24,7 +24,7 @@ public class ElevatorDisplay
             Console.WriteLine($"{i,2}: [{waitingPeople,-20}] {elevatorDisplay}");
         }
 
-        Console.WriteLine(new string('-', 30));
+        Console.WriteLine(new string('-', 40));
     }
 
     private string GetWaitingPeople(int floor)
