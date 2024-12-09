@@ -5,19 +5,19 @@ public class Elevator
 {
     private static int _idCounter = 0;
     private readonly Building _building;
+    private const int _timeToAdvanceOneFloor = 500;
 
+    public static int Capacity { get; set; } = 5; 
     public int Id { get; }
     public int CurrentFloor { get; private set; }
     public int? TargetFloor { get; private set; }
     public bool IsMovingUp { get; private set; }
-    public int Capacity { get; }
     public List<Person> Passengers { get; }
 
-    public Elevator(Building building, int capacity)
+    public Elevator(Building building)
     {
         Id = Interlocked.Increment(ref _idCounter);
         _building = building;
-        Capacity = capacity;
         Passengers = new List<Person>();
         CurrentFloor = 1;
     }
@@ -56,7 +56,7 @@ public class Elevator
 
     private void AdvanceOneFloor()
     {
-        Thread.Sleep(500);
+        Thread.Sleep(_timeToAdvanceOneFloor);
         CurrentFloor += IsMovingUp ? 1 : -1;
     }
 

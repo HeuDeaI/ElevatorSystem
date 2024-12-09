@@ -13,7 +13,7 @@ public class Building
     public int TotalFloors { get; }
     public IEnumerable<Elevator> Elevators => _elevators;
 
-    public Building(int totalFloors, int elevatorCount, int elevatorCapacity)
+    public Building(int totalFloors, int elevatorCount)
     {
         TotalFloors = totalFloors;
         _upwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
@@ -24,7 +24,7 @@ public class Building
 
         for (int i = 0; i < elevatorCount; i++)
         {
-            var elevator = new Elevator(this, elevatorCapacity);
+            var elevator = new Elevator(this);
             _elevators.Add(elevator);
             _availableElevators.Add(elevator);
         }
