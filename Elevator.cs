@@ -53,6 +53,12 @@ public class Elevator
         }
     }
 
+    public void HandleFireAlarm()
+    {
+        MoveToFloorWithoutServing(1);
+        DropOffPassengers();
+    }
+
     public void MoveToFloor(int destinationFloor)
     {
         TargetFloor = destinationFloor;

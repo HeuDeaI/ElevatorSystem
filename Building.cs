@@ -50,6 +50,14 @@ public class Building
         AssignElevatorToRequest();
     }
 
+    public void TriggerFireAlarm()
+    {
+        foreach (var elevator in _elevators)
+        {
+            new Thread(() => elevator.HandleFireAlarm()).Start();
+        }
+    }
+
     private void AssignElevatorToRequest()
     {
         if (!_requests.TryPeek(out var person))
