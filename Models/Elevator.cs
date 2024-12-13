@@ -14,6 +14,9 @@ public class Elevator
     public int? TargetFloor { get; private set; }
     public bool IsMovingUp { get; private set; }
     public List<Person> Passengers { get; }
+    
+    private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
+    private bool _isRunning = true;
 
     public Elevator(Building building)
     {
@@ -47,7 +50,7 @@ public class Elevator
         TargetFloor = destinationFloor;
         IsMovingUp = destinationFloor > CurrentFloor;
 
-        while (CurrentFloor != TargetFloor)
+        while (CurrentFloor != TargetFloor && _isRunning)
         {
             AdvanceOneFloor();
         }
@@ -62,7 +65,7 @@ public class Elevator
     public void MoveToFloor(int destinationFloor)
     {
         TargetFloor = destinationFloor;
-        while (CurrentFloor != TargetFloor)
+        while (CurrentFloor != TargetFloor && _isRunning)
         {
             AdvanceOneFloor();
             ServeCurrentFloor();
@@ -71,6 +74,7 @@ public class Elevator
 
     private void AdvanceOneFloor()
     {
+        _pauseEvent.Wait();
         Thread.Sleep(_timeToAdvanceOneFloor);
         CurrentFloor += IsMovingUp ? 1 : -1;
     }
@@ -111,5 +115,21 @@ public class Elevator
         {
             TargetFloor = person.DestinationFloor;
         }
+    }
+
+    public void Pause()
+    {
+        _pauseEvent.Reset();
+    }
+
+    public void Resume()
+    {
+        _pauseEvent.Set();
+    }
+
+    public void Stop()
+    {
+        _isRunning = false;
+        _pauseEvent.Set();
     }
 }

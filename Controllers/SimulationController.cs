@@ -20,20 +20,16 @@ public class SimulationController
         var inputThread = new Thread(HandleHotkeys);
         inputThread.Start();
 
-        while (true)
+        while (_isRunning)
         {
-            if (_isRunning)
+            if (!_isPaused)
             {
-                if (!_isPaused)
-                {
-                    _display.Render();
-                    Thread.Sleep(RenderDelay);
-                }
+                _display.Render();
+                Thread.Sleep(RenderDelay);
             }
             else
             {
-                Console.WriteLine("Simulation stopped. Press any key to exit.");
-                break;
+                Thread.Sleep(100);
             }
         }
     }
@@ -50,32 +46,32 @@ public class SimulationController
                 {
                     case ConsoleKey.R:
                         _isPaused = false;
-                        Console.WriteLine("Simulation resumed.");
+                        _building.ResumeAllElevators();
                         break;
 
                     case ConsoleKey.P:
                         _isPaused = true;
-                        Console.WriteLine("Simulation paused.");
+                        _building.PauseAllElevators();
                         break;
 
                     case ConsoleKey.S:
                         _isRunning = false;
-                        Console.WriteLine("Stopping simulation...");
+                        _building.StopAllElevators();
                         break;
 
                     case ConsoleKey.F:
                         _building.TriggerFireAlarm();
-                        Console.WriteLine("Fire alarm triggered.");
                         break;
 
                     case ConsoleKey.A:
                         _isPaused = true;
+                        _building.PauseAllElevators();
                         AddPerson();
+                        _building.ResumeAllElevators();
                         _isPaused = false;
                         break;
 
                     default:
-                        Console.WriteLine("Unknown hotkey. Try again.");
                         break;
                 }
             }
@@ -89,7 +85,6 @@ public class SimulationController
 
         if (string.IsNullOrWhiteSpace(input))
         {
-            Console.WriteLine("Invalid input. Try again.");
             return;
         }
 
@@ -98,15 +93,15 @@ public class SimulationController
             int.TryParse(args[0], out int start) &&
             int.TryParse(args[1], out int end))
         {
-            var person = new Person(start, end);
-            if (end > start)
-                person.RequestElevatorUp(_building);
-            else
-                person.RequestElevatorDown(_building);
-        }
-        else
-        {
-            Console.WriteLine("Invalid input. Use format: <startFloor> <endFloor>");
+            new Thread(() =>
+            {
+                var person = new Person(start, end);
+                if (end > start)
+                    person.RequestElevatorUp(_building);
+                else
+                    person.RequestElevatorDown(_building);
+            }).Start();
         }
     }
 }
+

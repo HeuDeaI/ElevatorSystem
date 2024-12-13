@@ -102,6 +102,30 @@ public class Building
         AssignElevatorToRequest();
     }
 
+    public void StopAllElevators()
+    {
+        foreach (var elevator in _elevators)
+        {
+            elevator.Stop();
+        }
+    }
+
+    public void PauseAllElevators()
+    {
+        foreach (var elevator in _elevators)
+        {
+            elevator.Pause();
+        }
+    }
+
+    public void ResumeAllElevators()
+    {
+        foreach (var elevator in _elevators)
+        {
+            elevator.Resume();
+        }
+    }
+
     public IDictionary<int, ConcurrentQueue<Person>> UpwardQueues => _upwardQueues;
     public IDictionary<int, ConcurrentQueue<Person>> DownwardQueues => _downwardQueues;
 }
