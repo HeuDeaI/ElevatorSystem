@@ -54,7 +54,7 @@ public class Building
     {
         foreach (var elevator in _elevators)
         {
-            new Thread(() => elevator.HandleFireAlarm()).Start();
+            elevator.HandleFireAlarm();
         }
     }
 
