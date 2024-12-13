@@ -69,7 +69,9 @@ public class SimulationController
                         break;
 
                     case ConsoleKey.A:
+                        _isPaused = true;
                         AddPerson();
+                        _isPaused = false;
                         break;
 
                     default:
@@ -101,8 +103,6 @@ public class SimulationController
                 person.RequestElevatorUp(_building);
             else
                 person.RequestElevatorDown(_building);
-
-            Console.WriteLine($"Person added: Start Floor {start}, End Floor {end}");
         }
         else
         {
