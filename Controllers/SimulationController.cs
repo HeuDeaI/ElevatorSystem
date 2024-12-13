@@ -93,6 +93,16 @@ public class SimulationController
             int.TryParse(args[0], out int start) &&
             int.TryParse(args[1], out int end))
         {
+            if (start < 1 || start > _building.TotalFloors || end < 1 || end > _building.TotalFloors)
+            {
+                return;
+            }
+
+            if (start == end)
+            {
+                return;
+            }
+
             new Thread(() =>
             {
                 var person = new Person(start, end);
