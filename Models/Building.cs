@@ -4,6 +4,7 @@ using System.Linq;
 
 public class Building
 {
+    public bool IsFireAlarmActive { get; private set; }
     private readonly ConcurrentDictionary<int, ConcurrentQueue<Person>> _upwardQueues;
     private readonly ConcurrentDictionary<int, ConcurrentQueue<Person>> _downwardQueues;
     private readonly ConcurrentBag<Elevator> _elevators;
@@ -16,6 +17,7 @@ public class Building
     public Building(int totalFloors, int elevatorCount)
     {
         TotalFloors = totalFloors;
+        IsFireAlarmActive = false;
         _upwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
         _downwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
         _elevators = new ConcurrentBag<Elevator>();
@@ -52,11 +54,10 @@ public class Building
 
     public void TriggerFireAlarm()
     {
-        foreach (var elevator in _elevators)
-        {
-            elevator.HandleFireAlarm();
-        }
-    }
+        IsFireAlarmActive = true;
+
+        Parallel.ForEach(_elevators, elevator => elevator.HandleFireAlarm());
+   }
 
     private void AssignElevatorToRequest()
     {

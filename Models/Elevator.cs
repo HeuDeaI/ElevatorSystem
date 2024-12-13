@@ -58,8 +58,14 @@ public class Elevator
 
     public void HandleFireAlarm()
     {
-        MoveToFloorWithoutServing(1);
-        DropOffPassengers();
+        _pauseEvent.Wait();
+        IsMovingUp = false;
+        while(CurrentFloor != 1)
+        {
+            Thread.Sleep(_timeToAdvanceOneFloor);
+            CurrentFloor += IsMovingUp ? 1 : -1;
+        }
+        Passengers.Clear();
     }
 
     public void MoveToFloor(int destinationFloor)
@@ -72,15 +78,20 @@ public class Elevator
         }
     }
 
+
     private void AdvanceOneFloor()
     {
+        if (_building.IsFireAlarmActive)
+        {
+            return;
+        }
         _pauseEvent.Wait();
         Thread.Sleep(_timeToAdvanceOneFloor);
         CurrentFloor += IsMovingUp ? 1 : -1;
     }
 
     private void ServeCurrentFloor()
-    {
+    {   
         DropOffPassengers();
         PickUpPassengers();
     }
