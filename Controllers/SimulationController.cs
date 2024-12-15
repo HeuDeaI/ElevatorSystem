@@ -8,6 +8,7 @@ public class SimulationController
     private readonly ElevatorDisplay _display;
     private bool _isRunning = true;
     private bool _isPaused = false;
+    private readonly Random _random = new Random();
 
     public SimulationController(Building building, ElevatorDisplay display)
     {
@@ -26,6 +27,9 @@ public class SimulationController
             {
                 _display.Render();
                 Thread.Sleep(RenderDelay);
+
+                if (_random.NextDouble() < 1.0 / 3.0)
+                    AddRandomPerson();
             }
             else
             {
@@ -80,11 +84,12 @@ public class SimulationController
 
     private void AddPerson()
     {
-        Console.WriteLine("Add Person: Enter start floor and end floor (e.g., 3 7):");
+        Console.WriteLine("Add Person: Enter start floor and end floor (e.g., 3 7), or enter 0 for a random person:");
         string? input = Console.ReadLine();
 
-        if (string.IsNullOrWhiteSpace(input))
+        if (string.IsNullOrWhiteSpace(input) || input == "0")
         {
+            AddRandomPerson();
             return;
         }
 
@@ -113,5 +118,24 @@ public class SimulationController
             }).Start();
         }
     }
-}
 
+    private void AddRandomPerson()
+    {
+        int startFloor = _random.Next(1, _building.TotalFloors + 1);
+        int targetFloor;
+
+        do
+        {
+            targetFloor = _random.Next(1, _building.TotalFloors + 1);
+        } while (targetFloor == startFloor);
+
+        new Thread(() =>
+        {
+            var person = new Person(startFloor, targetFloor);
+            if (targetFloor > startFloor)
+                person.RequestElevatorUp(_building);
+            else
+                person.RequestElevatorDown(_building);
+        }).Start();
+    }
+}
