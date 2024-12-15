@@ -18,7 +18,7 @@ public class SimulationController
 
     public void Run()
     {
-        var inputThread = new Thread(HandleHotkeys);
+        var inputThread = new Thread(Handlekeys);
         inputThread.Start();
 
         while (_isRunning)
@@ -38,7 +38,7 @@ public class SimulationController
         }
     }
 
-    private void HandleHotkeys()
+    private void Handlekeys()
     {
         while (_isRunning)
         {
