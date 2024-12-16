@@ -16,7 +16,7 @@ public class Building
 
     public Building(int totalFloors, int elevatorCount)
     {
-        TotalFloors = totalFloors;
+        TotalFloors = totalFloors < 20 ? totalFloors : 20;
         IsFireAlarmActive = false;
         _upwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
         _downwardQueues = new ConcurrentDictionary<int, ConcurrentQueue<Person>>();
@@ -29,7 +29,8 @@ public class Building
             _upwardQueues[floor] = new ConcurrentQueue<Person>();
             _downwardQueues[floor] = new ConcurrentQueue<Person>();
         }
-
+        
+        elevatorCount = elevatorCount < 5 ? elevatorCount : 5;
         for (int i = 0; i < elevatorCount; i++)
         {
             var elevator = new Elevator(this);

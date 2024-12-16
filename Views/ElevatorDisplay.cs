@@ -38,10 +38,25 @@ public class ElevatorDisplay
         return $"{up} {down}".Trim();
     }
 
-    private string GetElevatorAtFloor(int floor)
-    {
-        return string.Join(" ", _building.Elevators
-            .Where(e => e.CurrentFloor == floor)
-            .Select(e => $"E{e.Id}[{string.Join(" ", e.Passengers.Select(p => $"#{p.Id}"))}]"));
-    }
+private string GetElevatorAtFloor(int floor)
+{
+    var elevatorsAtFloor = _building.Elevators
+        .Where(e => e.CurrentFloor == floor)
+        .Select(e =>
+        {
+            var arriving = e.ArrivingPassengers.Select(p => $"#{p.Id}");
+            var remaining = e.Passengers.Select(p => $"#{p.Id}");
+            string elevatorDisplay = $"E{e.Id}" +
+                                     (remaining.Any() ? $"[{string.Join(" ", remaining)}]" : "") +
+                                     (arriving.Any() ? $" -> {string.Join(" ", arriving)}" : "");
+            e.ArrivingPassengers.Clear();
+            return elevatorDisplay;
+        });
+
+    return string.Join(" ", elevatorsAtFloor);
+}
+
+
+
+
 }

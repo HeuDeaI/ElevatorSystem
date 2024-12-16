@@ -14,6 +14,8 @@ public class Elevator
     public int? TargetFloor { get; private set; }
     public bool IsMovingUp { get; private set; }
     public List<Person> Passengers { get; }
+    public List<Person> ArrivingPassengers { get; private set; } = new List<Person>();
+
     
     private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
     private bool _isRunning = true;
@@ -80,10 +82,10 @@ public class Elevator
 
     public void MoveToLastFloors()
     {
-        while (CurrentFloor != TargetFloor)
+        while (CurrentFloor != TargetFloor && CurrentFloor > 1 && CurrentFloor < _building.TotalFloors)
         {
-            CurrentFloor += IsMovingUp ? 1 : -1;
             Thread.Sleep(_timeToAdvanceOneFloor);
+            CurrentFloor += IsMovingUp ? 1 : -1;
             DropOffPassengers();
         }
     }
@@ -108,6 +110,7 @@ public class Elevator
 
     private void DropOffPassengers()
     {
+        ArrivingPassengers = Passengers.Where(p => p.DestinationFloor == CurrentFloor).ToList();
         Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
     }
 
