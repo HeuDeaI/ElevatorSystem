@@ -1,26 +1,30 @@
-using System;
-using System.Threading;
-
 public class SimulationController
 {
-    private const int RenderDelay = 500;
     private readonly Building _building;
     private readonly ElevatorDisplay _display;
+    private readonly SimulationConfig _config;
+
+    private const int RenderDelay = 500;
     private bool _isRunning = true;
     private bool _isPaused = false;
     private bool _availableToSpawn = true;
     private readonly Random _random = new Random();
 
-    public SimulationController(Building building, ElevatorDisplay display)
+    public SimulationController(Building building, ElevatorDisplay display, SimulationConfig config)
     {
         _building = building;
         _display = display;
+        _config = config;
     }
 
     public void Run()
     {
-        var inputThread = new Thread(Handlekeys);
+        var inputThread = new Thread(HandleKeys);
+
         inputThread.Start();
+
+        int configPersonIndex = 0;
+        int timeIndex = 0;
 
         while (_isRunning)
         {
@@ -31,6 +35,16 @@ public class SimulationController
 
                 if (_random.NextDouble() < 1.0 / 3.0 && _availableToSpawn)
                     AddRandomPerson();
+
+                if (configPersonIndex < _config.People.Count() && _availableToSpawn)
+                {
+                    var personConfig = _config.People[configPersonIndex];
+                    if (personConfig.TimeDelay < timeIndex / 2)
+                        AddCustomPerson(personConfig.StartFloor, personConfig.TargetFloor);
+                        configPersonIndex++;
+                }
+                timeIndex++;
+
             }
             else
             {
@@ -39,7 +53,7 @@ public class SimulationController
         }
     }
 
-    private void Handlekeys()
+    private void HandleKeys()
     {
         while (_isRunning)
         {
@@ -133,6 +147,24 @@ public class SimulationController
         {
             targetFloor = _random.Next(1, _building.TotalFloors + 1);
         } while (targetFloor == startFloor);
+
+        new Thread(() =>
+        {
+            var person = new Person(startFloor, targetFloor);
+            if (targetFloor > startFloor)
+                person.RequestElevatorUp(_building);
+            else
+                person.RequestElevatorDown(_building);
+        }).Start();
+    }
+
+    private void AddCustomPerson(int startFloor, int targetFloor)
+    {
+        if (startFloor > _building.TotalFloors || targetFloor > _building.TotalFloors ||
+            startFloor < 1 || targetFloor < 1 || startFloor == targetFloor)
+        {
+            return;
+        }
 
         new Thread(() =>
         {
