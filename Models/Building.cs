@@ -29,7 +29,7 @@ public class Building
             _upwardQueues[floor] = new ConcurrentQueue<Person>();
             _downwardQueues[floor] = new ConcurrentQueue<Person>();
         }
-        
+
         elevatorCount = elevatorCount < 5 ? elevatorCount : 5;
         for (int i = 0; i < elevatorCount; i++)
         {
@@ -56,7 +56,14 @@ public class Building
     public void TriggerFireAlarm()
     {
         IsFireAlarmActive = true;
+        Parallel.ForEach(_upwardQueues.Values, queue => queue.Clear());
+        Parallel.ForEach(_downwardQueues.Values, queue => queue.Clear());
+
+        while (_requests.TryDequeue(out _)) { }
+
         Parallel.ForEach(_elevators, elevator => elevator.HandleFireAlarm());
+
+        IsFireAlarmActive = false;
    }
 
     private void AssignElevatorToRequest()

@@ -54,6 +54,8 @@ public class Elevator
 
         while (CurrentFloor != TargetFloor && _isRunning)
         {
+            if (_building.IsFireAlarmActive)
+                return;
             AdvanceOneFloor();
         }
     }
@@ -61,12 +63,13 @@ public class Elevator
     public void HandleFireAlarm()
     {
         _pauseEvent.Wait();
-        IsMovingUp = false;
-        while(CurrentFloor != 1)
+        while(CurrentFloor > 1)
         {
             Thread.Sleep(_timeToAdvanceOneFloor);
-            CurrentFloor += IsMovingUp ? 1 : -1;
+            CurrentFloor--;
         }
+        
+        ArrivingPassengers = Passengers.ToList();
         Passengers.Clear();
     }
 
@@ -75,6 +78,8 @@ public class Elevator
         TargetFloor = destinationFloor;
         while (CurrentFloor != TargetFloor && _isRunning)
         {
+            if (_building.IsFireAlarmActive)
+                return;
             AdvanceOneFloor();
             ServeCurrentFloor();
         }
@@ -93,10 +98,6 @@ public class Elevator
 
     private void AdvanceOneFloor()
     {
-        if (_building.IsFireAlarmActive)
-        {
-            return;
-        }
         _pauseEvent.Wait();
         Thread.Sleep(_timeToAdvanceOneFloor);
         CurrentFloor += IsMovingUp ? 1 : -1;
