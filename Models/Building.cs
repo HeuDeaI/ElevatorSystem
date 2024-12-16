@@ -17,7 +17,6 @@ public class Building
     private int _fireAlarmCount;
     private TimeSpan _fireAlarmDuration;
     private Stopwatch _fireAlarmActiveTime;
-
     private readonly ConcurrentDictionary<int, TimeSpan> _personWaitTimes;
     private readonly Stopwatch _buildingClock;
 

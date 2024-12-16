@@ -1,19 +1,29 @@
 Elevator Statistics:
+Elevator 4:
+  Total Trips: 13
+  Idle Trips: 8
+  Delivered Persons: 10
+
+Elevator 3:
+  Total Trips: 10
+  Idle Trips: 5
+  Delivered Persons: 13
+
 Elevator 2:
-  Total Trips: 12
-  Idle Trips: 7
-  Delivered Persons: 8
+  Total Trips: 15
+  Idle Trips: 8
+  Delivered Persons: 17
 
 Elevator 1:
-  Total Trips: 10
-  Idle Trips: 6
-  Delivered Persons: 6
+  Total Trips: 14
+  Idle Trips: 10
+  Delivered Persons: 9
 
 Overall Statistics:
-  Total Trips: 22
-  Total Idle Trips: 13
-  Total Delivered Persons: 14
-  Fire Alarms Triggered: 2
-  Total Fire Alarm Duration: 2.0098237 seconds
-  Average Wait Time: 1.59589562 seconds
-  Longest Wait Time: 4.0015906 seconds
+  Total Trips: 52
+  Total Idle Trips: 31
+  Total Delivered Persons: 49
+  Fire Alarms Triggered: 1
+  Total Fire Alarm Duration: 5.0147077 seconds
+  Average Wait Time: 2.646415986792453 seconds
+  Longest Wait Time: 7.96503 seconds
