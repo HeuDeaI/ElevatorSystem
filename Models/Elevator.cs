@@ -78,6 +78,16 @@ public class Elevator
         }
     }
 
+    public void MoveToLastFloors()
+    {
+        while (CurrentFloor != TargetFloor)
+        {
+            CurrentFloor += IsMovingUp ? 1 : -1;
+            Thread.Sleep(_timeToAdvanceOneFloor);
+            DropOffPassengers();
+        }
+    }
+
 
     private void AdvanceOneFloor()
     {
@@ -141,6 +151,13 @@ public class Elevator
     public void Stop()
     {
         _isRunning = false;
+        _pauseEvent.Reset();
+
+        if (TargetFloor.HasValue)
+        {
+            MoveToLastFloors();
+        }
+
         _pauseEvent.Set();
     }
 }

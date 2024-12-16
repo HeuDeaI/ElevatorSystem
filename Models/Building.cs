@@ -55,7 +55,6 @@ public class Building
     public void TriggerFireAlarm()
     {
         IsFireAlarmActive = true;
-
         Parallel.ForEach(_elevators, elevator => elevator.HandleFireAlarm());
    }
 
@@ -105,10 +104,15 @@ public class Building
 
     public void StopAllElevators()
     {
-        foreach (var elevator in _elevators)
+        Parallel.ForEach(_upwardQueues.Values, queue => queue.Clear());
+        Parallel.ForEach(_downwardQueues.Values, queue => queue.Clear());
+
+        while (_requests.TryDequeue(out _)) { }
+
+        Parallel.ForEach(_elevators, elevator =>
         {
-            elevator.Stop();
-        }
+            elevator.Stop(); 
+        });
     }
 
     public void PauseAllElevators()

@@ -8,6 +8,7 @@ public class SimulationController
     private readonly ElevatorDisplay _display;
     private bool _isRunning = true;
     private bool _isPaused = false;
+    private bool _willStop = true;
     private readonly Random _random = new Random();
 
     public SimulationController(Building building, ElevatorDisplay display)
@@ -28,7 +29,7 @@ public class SimulationController
                 _display.Render();
                 Thread.Sleep(RenderDelay);
 
-                if (_random.NextDouble() < 1.0 / 3.0)
+                if (_random.NextDouble() < 1.0 / 3.0 && _willStop)
                     AddRandomPerson();
             }
             else
@@ -59,8 +60,10 @@ public class SimulationController
                         break;
 
                     case ConsoleKey.S:
-                        _isRunning = false;
+                        _willStop = false;
                         _building.StopAllElevators();
+                        _display.Render();
+                        _isRunning = false;
                         break;
 
                     case ConsoleKey.F:
