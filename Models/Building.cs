@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 public class Building
@@ -10,6 +13,13 @@ public class Building
     private readonly ConcurrentBag<Elevator> _elevators;
     private readonly ConcurrentBag<Elevator> _availableElevators;
     private readonly ConcurrentQueue<Person> _requests;
+
+    private int _fireAlarmCount;
+    private TimeSpan _fireAlarmDuration;
+    private Stopwatch _fireAlarmActiveTime;
+
+    private readonly ConcurrentDictionary<int, TimeSpan> _personWaitTimes;
+    private readonly Stopwatch _buildingClock;
 
     public int TotalFloors { get; }
     public IEnumerable<Elevator> Elevators => _elevators;
@@ -23,6 +33,13 @@ public class Building
         _elevators = new ConcurrentBag<Elevator>();
         _availableElevators = new ConcurrentBag<Elevator>();
         _requests = new ConcurrentQueue<Person>();
+
+        _fireAlarmCount = 0;
+        _fireAlarmDuration = TimeSpan.Zero;
+        _fireAlarmActiveTime = new Stopwatch();
+
+        _personWaitTimes = new ConcurrentDictionary<int, TimeSpan>();
+        _buildingClock = Stopwatch.StartNew();
 
         for (int floor = 0; floor <= TotalFloors; ++floor)
         {
@@ -41,6 +58,7 @@ public class Building
 
     public void RequestElevatorUp(Person person)
     {
+        person.WaitStartTime = _buildingClock.Elapsed;
         _upwardQueues.GetOrAdd(person.OriginFloor, _ => new ConcurrentQueue<Person>()).Enqueue(person);
         _requests.Enqueue(person);
         AssignElevatorToRequest();
@@ -48,20 +66,33 @@ public class Building
 
     public void RequestElevatorDown(Person person)
     {
+        person.WaitStartTime = _buildingClock.Elapsed;
         _downwardQueues.GetOrAdd(person.OriginFloor, _ => new ConcurrentQueue<Person>()).Enqueue(person);
         _requests.Enqueue(person);
         AssignElevatorToRequest();
     }
 
+    public void RecordPersonWaitTime(Person person)
+    {
+        var waitTime = _buildingClock.Elapsed - person.WaitStartTime;
+        _personWaitTimes.AddOrUpdate(person.Id, waitTime, (id, existingTime) => waitTime);
+    }
+
     public void TriggerFireAlarm()
     {
         IsFireAlarmActive = true;
+        _fireAlarmCount++;
+        _fireAlarmActiveTime.Restart();
+
         Parallel.ForEach(_upwardQueues.Values, queue => queue.Clear());
         Parallel.ForEach(_downwardQueues.Values, queue => queue.Clear());
 
         while (_requests.TryDequeue(out _)) { }
 
         Parallel.ForEach(_elevators, elevator => elevator.HandleFireAlarm());
+
+        _fireAlarmActiveTime.Stop();
+        _fireAlarmDuration += _fireAlarmActiveTime.Elapsed;
 
         IsFireAlarmActive = false;
    }
@@ -169,10 +200,18 @@ public class Building
                 totalDeliveredPersons += elevator.CountOfDeliveredPersons;
             }
 
+            var totalWaitTime = _personWaitTimes.Values.Sum(t => t.TotalSeconds);
+            var avgWaitTime = _personWaitTimes.Count > 0 ? totalWaitTime / _personWaitTimes.Count : 0;
+            var longestWaitTime = _personWaitTimes.Values.Any() ? _personWaitTimes.Values.Max(t => t.TotalSeconds) : 0;
+
             string overallStats = "Overall Statistics:\n" +
-                                $"  Total Trips: {totalTrips}\n" +
-                                $"  Total Idle Trips: {totalIdleTrips}\n" +
-                                $"  Total Delivered Persons: {totalDeliveredPersons}";
+                                  $"  Total Trips: {totalTrips}\n" +
+                                  $"  Total Idle Trips: {totalIdleTrips}\n" +
+                                  $"  Total Delivered Persons: {totalDeliveredPersons}\n" +
+                                  $"  Fire Alarms Triggered: {_fireAlarmCount}\n" +
+                                  $"  Total Fire Alarm Duration: {_fireAlarmDuration.TotalSeconds} seconds\n" +
+                                  $"  Average Wait Time: {avgWaitTime} seconds\n" +
+                                  $"  Longest Wait Time: {longestWaitTime} seconds";
 
             writer.WriteLine(overallStats);
             Console.WriteLine(overallStats);

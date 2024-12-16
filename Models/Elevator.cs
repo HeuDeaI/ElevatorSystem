@@ -136,6 +136,8 @@ public class Elevator
 
                 Passengers.Add(person);
                 UpdateTargetFloor(person);
+
+                _building.RecordPersonWaitTime(person);
             }
         }
     }
