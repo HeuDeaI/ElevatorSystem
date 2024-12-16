@@ -76,7 +76,6 @@ public class SimulationController
                     case ConsoleKey.S:
                         _availableToSpawn = false;
                         _building.StopAllElevators();
-                        _display.Render();
                         _isRunning = false;
                         break;
 

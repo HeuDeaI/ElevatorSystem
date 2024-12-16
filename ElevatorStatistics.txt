@@ -1,0 +1,25 @@
+Elevator Statistics:
+Elevator 4:
+  Total Trips: 2
+  Idle Trips: 1
+  Delivered Persons: 8
+
+Elevator 3:
+  Total Trips: 4
+  Idle Trips: 3
+  Delivered Persons: 1
+
+Elevator 2:
+  Total Trips: 3
+  Idle Trips: 2
+  Delivered Persons: 3
+
+Elevator 1:
+  Total Trips: 9
+  Idle Trips: 6
+  Delivered Persons: 3
+
+Overall Statistics:
+  Total Trips: 18
+  Total Idle Trips: 12
+  Total Delivered Persons: 15

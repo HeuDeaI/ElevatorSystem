@@ -16,7 +16,10 @@ public class Elevator
     public List<Person> Passengers { get; }
     public List<Person> ArrivingPassengers { get; private set; } = new List<Person>();
 
-    
+    public int TotalTrips { get; private set; }
+    public int IdleTrips { get; private set; }
+    public int CountOfDeliveredPersons { get; private set; }
+
     private ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
     private bool _isRunning = true;
 
@@ -26,6 +29,9 @@ public class Elevator
         _building = building;
         Passengers = new List<Person>();
         CurrentFloor = 1;
+        TotalTrips = 0;
+        IdleTrips = 0;
+        CountOfDeliveredPersons = 0;
     }
 
     public void HandleRequest(Person person)
@@ -58,6 +64,8 @@ public class Elevator
                 return;
             AdvanceOneFloor();
         }
+        IdleTrips++;
+        TotalTrips++;
     }
 
     public void HandleFireAlarm()
@@ -83,6 +91,7 @@ public class Elevator
             AdvanceOneFloor();
             ServeCurrentFloor();
         }
+        TotalTrips++;
     }
 
     public void MoveToLastFloors()
@@ -112,6 +121,7 @@ public class Elevator
     private void DropOffPassengers()
     {
         ArrivingPassengers = Passengers.Where(p => p.DestinationFloor == CurrentFloor).ToList();
+        CountOfDeliveredPersons += ArrivingPassengers.Count();
         Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
     }
 

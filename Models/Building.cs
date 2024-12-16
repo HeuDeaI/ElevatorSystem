@@ -119,8 +119,10 @@ public class Building
 
         Parallel.ForEach(_elevators, elevator =>
         {
-            elevator.Stop(); 
+            elevator.Stop();
         });
+
+        PrintElevatorStatistics();
     }
 
     public void PauseAllElevators()
@@ -137,6 +139,46 @@ public class Building
         {
             elevator.Resume();
         }
+    }
+
+    private void PrintElevatorStatistics()
+    {
+        int totalTrips = 0;
+        int totalIdleTrips = 0;
+        int totalDeliveredPersons = 0;
+
+        string filePath = "ElevatorStatistics.txt";
+
+        using (var writer = new StreamWriter(filePath))
+        {
+            writer.WriteLine("Elevator Statistics:");
+            Console.WriteLine("Elevator Statistics:");
+
+            foreach (var elevator in _elevators)
+            {
+                string elevatorStats = $"Elevator {elevator.Id}:\n" +
+                                    $"  Total Trips: {elevator.TotalTrips}\n" +
+                                    $"  Idle Trips: {elevator.IdleTrips}\n" +
+                                    $"  Delivered Persons: {elevator.CountOfDeliveredPersons}\n";
+
+                writer.WriteLine(elevatorStats);
+                Console.WriteLine(elevatorStats);
+
+                totalTrips += elevator.TotalTrips;
+                totalIdleTrips += elevator.IdleTrips;
+                totalDeliveredPersons += elevator.CountOfDeliveredPersons;
+            }
+
+            string overallStats = "Overall Statistics:\n" +
+                                $"  Total Trips: {totalTrips}\n" +
+                                $"  Total Idle Trips: {totalIdleTrips}\n" +
+                                $"  Total Delivered Persons: {totalDeliveredPersons}";
+
+            writer.WriteLine(overallStats);
+            Console.WriteLine(overallStats);
+        }
+
+        Console.WriteLine($"Statistics saved to {filePath}");
     }
 
     public IDictionary<int, ConcurrentQueue<Person>> UpwardQueues => _upwardQueues;
